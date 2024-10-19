@@ -197,7 +197,6 @@ public class MainActivity extends AppCompatActivity {
         public void onReceive(Context context, Intent intent) {
             // ブロードキャストからデータを取得
             String type = intent.getStringExtra("notification_type");
-            String title = intent.getStringExtra("notification_title");
             String text = intent.getStringExtra("notification_text");
 
             // 取得したデータをTextViewに設定
