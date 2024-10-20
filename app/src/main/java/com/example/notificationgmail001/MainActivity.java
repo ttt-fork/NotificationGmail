@@ -85,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void run(){
                         try{
-                            doSend();
+                            doSend("メール送信ボタンイベント");
                         }catch(Exception e){
                             Log.e(TAG, "Exception:" + e.toString());
                         }
@@ -157,10 +157,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    void doSend() throws Exception{
+    void doSend(String sendText) throws Exception{
         Log.d(TAG, "doSend() start");
 
-        mSndMsg.sendEmail("onod0601@gmail.com","onod0601@gmail.com", mCrdntial);
+        mSndMsg.sendEmail("onod0601@gmail.com","onod0601@gmail.com", sendText, mCrdntial);
 
         Log.d(TAG, "doSend() end");
     }
@@ -179,7 +179,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void run(){
                         try{
-                            doSend();
+                            doSend(text);
                         }catch(Exception e){
                             Log.e(TAG, "Exception:" + e.toString());
                         }

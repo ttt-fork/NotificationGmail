@@ -48,6 +48,7 @@ public class SendMessage {
      */
     public static Message sendEmail(String fromEmailAddress,
                                     String toEmailAddress,
+                                    String sendText,
                                     GoogleAccountCredential argCrdntial)
             throws MessagingException, IOException {
         /* Load pre-authorized user credentials from the environment.
@@ -84,11 +85,11 @@ public class SendMessage {
 //        }
 
         // フォーマットを指定
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm", Locale.getDefault());
 
         // Create the email content
         String messageSubject = "Test message";
-        String bodyText = "test " + formatter.format(new Date());;
+        String bodyText = formatter.format(new Date()) + "\n" + sendText;
 
         // Encode as MIME message
         Properties props = new Properties();
