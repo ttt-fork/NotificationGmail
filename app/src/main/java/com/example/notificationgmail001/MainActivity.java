@@ -4,16 +4,12 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.net.Uri;
 import android.app.Activity;
-import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -28,22 +24,14 @@ import com.google.android.gms.common.api.Scope;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.google.api.client.json.gson.GsonFactory;
 
-import java.text.SimpleDateFormat;
 import java.util.Collections;
-import java.util.Date;
-import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
     private String TAG = "MainActivity";
-    private String P_NAME = "PrefNotificationLog";
-    private String K_NAME = "NotificationLog";
     private Button mBtnNotificationListenerSettings = null;
     private Button mBtnAuthGoogle = null;
     private Button mBtnMailSend = null;
-    private EditText mETxtLog = null;
     private NotificationReceiver notificationReceiver = null;
-    private String mNotificationLog = "";
-    private SharedPreferences mSharedPreferences = null;
 
     private static final int REQUEST_CODE_SIGN_IN = 1;
     private static final int REQUEST_CODE_OPEN_DOCUMENT = 2;
@@ -63,14 +51,6 @@ public class MainActivity extends AppCompatActivity {
         });
 
         Log.d(TAG, "onCreate()001");
-
-        //
-        mSharedPreferences = getSharedPreferences(P_NAME, MODE_PRIVATE);
-        mNotificationLog = mSharedPreferences.getString(K_NAME,"文字列なし");
-
-        // ログ表示表のエディットテキスト
-        mETxtLog = findViewById(R.id.editText);
-        mETxtLog.setText(mNotificationLog);
 
         // ブロードキャストレシーバーのインスタンスを作成
         notificationReceiver = new NotificationReceiver();
@@ -105,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void run(){
                         try{
-                            doSend("メール送信ボタンイベント");
+                            doSend();
                         }catch(Exception e){
                             Log.e(TAG, "Exception:" + e.toString());
                         }
@@ -114,12 +94,6 @@ public class MainActivity extends AppCompatActivity {
 
                 Thread thread = new Thread(runnable);
                 thread.start();
-
-                mNotificationLog = "clear";
-                mETxtLog.setText(mNotificationLog);
-                SharedPreferences.Editor editor = mSharedPreferences.edit();
-                editor.putString(K_NAME, mNotificationLog);
-                editor.apply();
             }
         });
     }
@@ -183,10 +157,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    void doSend(String sendText) throws Exception{
+    void doSend() throws Exception{
         Log.d(TAG, "doSend() start");
 
-        mSndMsg.sendEmail("onod0601@gmail.com","onod0601@gmail.com", sendText, mCrdntial);
+        mSndMsg.sendEmail("onod0601@gmail.com","onod0601@gmail.com", mCrdntial);
 
         Log.d(TAG, "doSend() end");
     }
@@ -196,41 +170,24 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             // ブロードキャストからデータを取得
-            String type = intent.getStringExtra("notification_type");
             String title = intent.getStringExtra("notification_title");
             String text = intent.getStringExtra("notification_text");
 
             // 取得したデータをTextViewに設定
             if (text != null) {
-                if( type.equals("normal") ) {
-                    // メール送信
-                    Runnable runnable = new Runnable(){
-                        @Override
-                        public void run(){
-                            try{
-                                doSend(text);
-                            }catch(Exception e){
-                                Log.e(TAG, "Exception:" + e.toString());
-                            }
+                Runnable runnable = new Runnable(){
+                    @Override
+                    public void run(){
+                        try{
+                            doSend();
+                        }catch(Exception e){
+                            Log.e(TAG, "Exception:" + e.toString());
                         }
-                    };
+                    }
+                };
 
-                    Thread thread = new Thread(runnable);
-                    thread.start();
-                }
-                else {}
-
-                // フォーマットを指定
-                SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm", Locale.getDefault());
-                String logtext1 = formatter.format(new Date()) + " " + text;
-
-                // ログの記録
-                mNotificationLog = mNotificationLog + "\n" + logtext1.replaceAll("[\n\r]", " ");
-                mETxtLog.setText(mNotificationLog);
-
-                SharedPreferences.Editor editor = mSharedPreferences.edit();
-                editor.putString(K_NAME, mNotificationLog);
-                editor.apply();
+                Thread thread = new Thread(runnable);
+                thread.start();
             }
         }
     }
