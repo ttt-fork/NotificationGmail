@@ -5,11 +5,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.net.Uri;
 import android.app.Activity;
+import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -31,7 +34,9 @@ public class MainActivity extends AppCompatActivity {
     private Button mBtnNotificationListenerSettings = null;
     private Button mBtnAuthGoogle = null;
     private Button mBtnMailSend = null;
+    private EditText mETxtLog = null;
     private NotificationReceiver notificationReceiver = null;
+    private String mNotificationLog = "";
 
     private static final int REQUEST_CODE_SIGN_IN = 1;
     private static final int REQUEST_CODE_OPEN_DOCUMENT = 2;
@@ -51,6 +56,9 @@ public class MainActivity extends AppCompatActivity {
         });
 
         Log.d(TAG, "onCreate()001");
+
+        // ログ表示表のエディットテキスト
+        mETxtLog = findViewById(R.id.editText);
 
         // ブロードキャストレシーバーのインスタンスを作成
         notificationReceiver = new NotificationReceiver();
@@ -170,24 +178,33 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onReceive(Context context, Intent intent) {
             // ブロードキャストからデータを取得
+            String type = intent.getStringExtra("notification_type");
             String title = intent.getStringExtra("notification_title");
             String text = intent.getStringExtra("notification_text");
 
             // 取得したデータをTextViewに設定
             if (text != null) {
-                Runnable runnable = new Runnable(){
-                    @Override
-                    public void run(){
-                        try{
-                            doSend(text);
-                        }catch(Exception e){
-                            Log.e(TAG, "Exception:" + e.toString());
+                if( type.equals("normal") ) {
+                    // メール送信
+                    Runnable runnable = new Runnable(){
+                        @Override
+                        public void run(){
+                            try{
+                                doSend(text);
+                            }catch(Exception e){
+                                Log.e(TAG, "Exception:" + e.toString());
+                            }
                         }
-                    }
-                };
+                    };
 
-                Thread thread = new Thread(runnable);
-                thread.start();
+                    Thread thread = new Thread(runnable);
+                    thread.start();
+                }
+                else {
+                    // ログの記録
+                    mNotificationLog = mNotificationLog + "\n" + text.replaceAll("[\n\r]", "");
+                    mETxtLog.setText(mNotificationLog);
+                }
             }
         }
     }

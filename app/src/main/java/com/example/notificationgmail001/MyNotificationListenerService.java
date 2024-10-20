@@ -87,11 +87,19 @@ public class MyNotificationListenerService extends NotificationListenerService {
                 if(flgSend == true) {
                     // アクティビティが起動しているかどうかに関係なくブロードキャストも送信
                     Intent broadcastIntent = new Intent("com.example.NOTIFICATION_LISTENER");
+                    broadcastIntent.putExtra("notification_type", "normal");
                     broadcastIntent.putExtra("notification_title", strDsp);
                     broadcastIntent.putExtra("notification_text", strDsp);
                     sendBroadcast(broadcastIntent);
                 }
                 else{}
+
+                // ログ表示用に送る(これはメール送信されない)
+                Intent broadcastIntent = new Intent("com.example.NOTIFICATION_LISTENER");
+                broadcastIntent.putExtra("notification_type", "log");
+                broadcastIntent.putExtra("notification_title", strSrc);
+                broadcastIntent.putExtra("notification_text", strSrc);
+                sendBroadcast(broadcastIntent);
             }
         }
         else{}
