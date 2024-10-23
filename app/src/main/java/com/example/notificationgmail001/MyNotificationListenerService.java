@@ -25,14 +25,14 @@ public class MyNotificationListenerService extends NotificationListenerService {
         Log.d(TAG, "onNotificationPosted()001");
 
         // 通知が投稿された際の処理
+        CharSequence text = sbn.getNotification().tickerText;
         Bundle extras = sbn.getNotification().extras;
 
-        if(extras != null) {
-            String strExtrTitle = extras.getString(Notification.EXTRA_TITLE);
-            String strExtrText = extras.getString(Notification.EXTRA_TEXT);
+        if(text != null && extras != null) {
+            String strBody = text.toString();
 
-            String notificationId   = sbn.getPackageName() + ":" + sbn.getId() + ":" +                              ":" + strExtrText;
-            String notificationWhen = sbn.getPackageName() + ":" +               ":" + sbn.getNotification().when + ":" + strExtrText;
+            String notificationId   = sbn.getPackageName() + ":" + sbn.getId() + ":" +                              ":" + strBody;
+            String notificationWhen = sbn.getPackageName() + ":" +               ":" + sbn.getNotification().when + ":" + strBody;
 
             // すでに処理済みの通知かどうかをチェック
             if (processedNotifications.contains(notificationId) ||
@@ -46,8 +46,7 @@ public class MyNotificationListenerService extends NotificationListenerService {
                 Log.d(TAG, "add:" + notificationWhen);
 
                 Boolean flgSend = false;
-                String strSrc = "タイトル："+ strExtrTitle + "\n本文：" + strExtrText;
-
+                String strSrc = "タイトル："+ extras.getString(Notification.EXTRA_TITLE) + "\n本文：" + strBody;
                 Log.d(TAG, strSrc);
 
                 String strDsp = strSrc;
@@ -66,7 +65,7 @@ public class MyNotificationListenerService extends NotificationListenerService {
                     String strDspTmp = strSrc;
                     strDspTmp = replaceNtfctnTxt(strDspTmp,"hugnote", "hugnote");
                     strDspTmp = replaceNtfctnTxt(strDspTmp,"おのでら", "");
-                    if(strDspTmp != null) {
+                    if(strDsp != null) {
                         flgSend = true;
                         strDsp = strDspTmp;
                     }
@@ -78,7 +77,7 @@ public class MyNotificationListenerService extends NotificationListenerService {
                     strDspTmp = replaceNtfctnTxt(strDspTmp,"【アワーキッズ鎌倉分園】", "【保育園】");
                     strDspTmp = replaceNtfctnTxt(strDspTmp,"小野寺", "");
                     strDspTmp = replaceNtfctnTxt(strDspTmp,"智香", "ともか");
-                    if(strDspTmp != null) {
+                    if(strDsp != null) {
                         flgSend = true;
                         strDsp = strDspTmp;
                     }
@@ -89,22 +88,24 @@ public class MyNotificationListenerService extends NotificationListenerService {
                     // アクティビティが起動しているかどうかに関係なくブロードキャストも送信
                     Intent broadcastIntent = new Intent("com.example.NOTIFICATION_LISTENER");
                     broadcastIntent.putExtra("notification_type", "normal");
+                    broadcastIntent.putExtra("notification_title", strDsp);
                     broadcastIntent.putExtra("notification_text", strDsp);
                     sendBroadcast(broadcastIntent);
                 }
-                else{
-                    // ログ表示用に送る(これはメール送信されない)
-                    Intent broadcastIntent = new Intent("com.example.NOTIFICATION_LISTENER");
-                    broadcastIntent.putExtra("notification_type", "log");
-                    broadcastIntent.putExtra("notification_text", strSrc);
-                    sendBroadcast(broadcastIntent);
-                }
+                else{}
+
+                // ログ表示用に送る(これはメール送信されない)
+                Intent broadcastIntent = new Intent("com.example.NOTIFICATION_LISTENER");
+                broadcastIntent.putExtra("notification_type", "log");
+                broadcastIntent.putExtra("notification_title", strSrc);
+                broadcastIntent.putExtra("notification_text", strSrc);
+                sendBroadcast(broadcastIntent);
             }
         }
         else{}
 
         // アクティブな通知をすべて取得する
-//        StatusBarNotification[] array = getActiveNotifications();
+///        StatusBarNotification[] array = getActiveNotifications();
     }
 
     @Override
@@ -169,6 +170,7 @@ public class MyNotificationListenerService extends NotificationListenerService {
 
                 // アクティビティが起動しているかどうかに関係なくブロードキャストも送信
                 Intent broadcastIntent = new Intent("com.example.NOTIFICATION_LISTENER");
+                broadcastIntent.putExtra("notification_title", "MyNotificationListenerService:fff()");
                 broadcastIntent.putExtra("notification_text", "MyNotificationListenerService:fff()");
                 sendBroadcast(broadcastIntent);
 

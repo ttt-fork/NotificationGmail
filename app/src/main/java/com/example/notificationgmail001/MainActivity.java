@@ -4,7 +4,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
@@ -28,22 +27,16 @@ import com.google.android.gms.common.api.Scope;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
 import com.google.api.client.json.gson.GsonFactory;
 
-import java.text.SimpleDateFormat;
 import java.util.Collections;
-import java.util.Date;
-import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
     private String TAG = "MainActivity";
-    private String P_NAME = "PrefNotificationLog";
-    private String K_NAME = "NotificationLog";
     private Button mBtnNotificationListenerSettings = null;
     private Button mBtnAuthGoogle = null;
     private Button mBtnMailSend = null;
     private EditText mETxtLog = null;
     private NotificationReceiver notificationReceiver = null;
     private String mNotificationLog = "";
-    private SharedPreferences mSharedPreferences = null;
 
     private static final int REQUEST_CODE_SIGN_IN = 1;
     private static final int REQUEST_CODE_OPEN_DOCUMENT = 2;
@@ -64,13 +57,8 @@ public class MainActivity extends AppCompatActivity {
 
         Log.d(TAG, "onCreate()001");
 
-        //
-        mSharedPreferences = getSharedPreferences(P_NAME, MODE_PRIVATE);
-        mNotificationLog = mSharedPreferences.getString(K_NAME,"文字列なし");
-
         // ログ表示表のエディットテキスト
         mETxtLog = findViewById(R.id.editText);
-        mETxtLog.setText(mNotificationLog);
 
         // ブロードキャストレシーバーのインスタンスを作成
         notificationReceiver = new NotificationReceiver();
@@ -114,12 +102,6 @@ public class MainActivity extends AppCompatActivity {
 
                 Thread thread = new Thread(runnable);
                 thread.start();
-
-                mNotificationLog = "clear";
-                mETxtLog.setText(mNotificationLog);
-                SharedPreferences.Editor editor = mSharedPreferences.edit();
-                editor.putString(K_NAME, mNotificationLog);
-                editor.apply();
             }
         });
     }
@@ -217,19 +199,11 @@ public class MainActivity extends AppCompatActivity {
                     Thread thread = new Thread(runnable);
                     thread.start();
                 }
-                else {}
-
-                // フォーマットを指定
-                SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd HH:mm", Locale.getDefault());
-                String logtext1 = formatter.format(new Date()) + " " + text;
-
-                // ログの記録
-                mNotificationLog = mNotificationLog + "\n" + logtext1.replaceAll("[\n\r]", " ");
-                mETxtLog.setText(mNotificationLog);
-
-                SharedPreferences.Editor editor = mSharedPreferences.edit();
-                editor.putString(K_NAME, mNotificationLog);
-                editor.apply();
+                else {
+                    // ログの記録
+                    mNotificationLog = mNotificationLog + "\n" + text.replaceAll("[\n\r]", "");
+                    mETxtLog.setText(mNotificationLog);
+                }
             }
         }
     }
